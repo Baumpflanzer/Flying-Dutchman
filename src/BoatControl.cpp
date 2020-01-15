@@ -1,9 +1,16 @@
+/** 
+ *  @file   BoatControl.cpp
+ *  @brief  gets position, calculates the ideal route and controls the boat
+ *  @author Maximilian M
+ *  @date   2020-01-14
+ ***********************************************/
+
 #include <Arduino.h>
 #include "SoftwareSerial.h"
 #include "BoatControl.h"
 
 using namespace std;
-float tolerance = 0.000005;
+float tolerance = 0.0005;
 float aim = 0.001; //0.0001deg = 11m
 
 /**
@@ -16,6 +23,7 @@ void BoatControl::addWaypoint(float& lat, float& lon)
     m_waypoint wp;
     wp.lat = lat;
     wp.lon = lon;
+    wp.done = false;
     waypoints.push_back(wp);
 }
 
@@ -44,8 +52,11 @@ void BoatControl::addWaypoint(string& waypoints)
 */
 BoatControl::m_waypoint BoatControl::getPosition()
 {
-    TinyGPSPlus gps;
     m_waypoint wp;
+    wp.lat = 52.455142;
+    wp.lon = 13.526710;
+    /*
+    TinyGPSPlus gps;
     SoftwareSerial serialConnection(19, 21);
     serialConnection.begin(9600);
 
@@ -59,7 +70,7 @@ BoatControl::m_waypoint BoatControl::getPosition()
         wp.lon = gps.location.lng();
     }
     while (gps.location.lat() == 0.0 && gps.location.lng() == 0.0); //until it has read a decent value
-
+    */
     return wp;
 }
 
@@ -118,6 +129,7 @@ float BoatControl::nextOrientation(m_waypoint& currentPosition, m_waypoint& next
 	{
 		finalAngle = finalAngle + 2 * PI;
 	}
+
     return finalAngle;
 }
 
@@ -155,14 +167,16 @@ bool BoatControl::goHere(m_waypoint& nextWaypoint, m_waypoint& lastWaypoint)
             nextWaypoint.done = true;
             return true;
         }
-
+        
         float nOrientation = nextOrientation(currentPosition, nextWaypoint, lastWaypoint);
+        
+        //just for presentation
         Serial.print("finalAngle: ");
         Serial.println(nOrientation*180/PI);
         
         //move in the right direction
         drive(nOrientation);
-        delay(5000);
+        delay(3000);
     }
     //point not reached after trying 100 tries (will make something more sophisticated later)
     return false;
@@ -172,10 +186,17 @@ bool BoatControl::goHere(m_waypoint& nextWaypoint, m_waypoint& lastWaypoint)
 * Find next m_waypoint and use goHere function
 * @return true if point is reached
 */
-bool BoatControl::goToNextWaypoint()
+int BoatControl::goToNextWaypoint()
 {
-    //find next m_waypoint
+    //find next m_waypoint starting with second m_waypoint
     int i;
     for (i = 1; waypoints[i].done; i++) {}
-    return goHere(waypoints[i], waypoints[i-1]);
+    if (goHere(waypoints[i], waypoints[i-1]))
+    {
+        return i;
+    }
+    else
+    {
+        return 0;
+    }
 }

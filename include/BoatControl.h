@@ -7,13 +7,13 @@ class BoatControl
 public:
     void addWaypoint(float&, float&);
     void addWaypoint(std::string&);
-    bool goToNextWaypoint();
+    int goToNextWaypoint();
 private:
-    float tolerance;
+    //float tolerance;
     struct m_waypoint{
         float lat;
         float lon;
-        bool done = false;
+        bool done;
     };
     std::vector<m_waypoint> getWaypoints()
     {
