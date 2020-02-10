@@ -8,7 +8,6 @@
 #include <Arduino.h>
 #include <string>
 #include "BoatControl.h"
-#include "GSM.h"
 
 using namespace std;
 
@@ -29,7 +28,6 @@ string gpxDocument = R"V0G0N(
 
 BoatControl flyingDutchman;
 
-GSM myGSM;
 
 void setup() 
 {

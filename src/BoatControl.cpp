@@ -53,9 +53,7 @@ void BoatControl::addWaypoint(string& waypoints)
 BoatControl::m_waypoint BoatControl::getPosition()
 {
     m_waypoint wp;
-    wp.lat = 52.455142;
-    wp.lon = 13.526710;
-    /*
+
     TinyGPSPlus gps;
     SoftwareSerial serialConnection(19, 21);
     serialConnection.begin(9600);
@@ -70,7 +68,7 @@ BoatControl::m_waypoint BoatControl::getPosition()
         wp.lon = gps.location.lng();
     }
     while (gps.location.lat() == 0.0 && gps.location.lng() == 0.0); //until it has read a decent value
-    */
+
     return wp;
 }
 
@@ -86,9 +84,9 @@ float BoatControl::getOrientation()
 }
 
 /**
-* if point is not reached go there
+* If point is not reached calculate next orientation. .gif included shows all parameters for better understanding
 * @param nextWaypoint first m_waypoint that has not been reached yet
-* @param lastWaypoint the last m_waypoint that has been reached
+* @param lastWaypoint the last m_waypoint that already has been reached
 * @return angle of the orientation that needs to be reached (from y Axis)
 */
 float BoatControl::nextOrientation(m_waypoint& currentPosition, m_waypoint& nextWaypoint, m_waypoint& lastWaypoint)
@@ -174,6 +172,7 @@ bool BoatControl::goHere(m_waypoint& nextWaypoint, m_waypoint& lastWaypoint)
         Serial.print("finalAngle: ");
         Serial.println(nOrientation*180/PI);
         
+        //hold back tears so i can...
         //move in the right direction
         drive(nOrientation);
         delay(3000);
@@ -184,7 +183,7 @@ bool BoatControl::goHere(m_waypoint& nextWaypoint, m_waypoint& lastWaypoint)
 
 /**
 * Find next m_waypoint and use goHere function
-* @return true if point is reached
+* @return ID of point if point is reached, -1 if point is not reached
 */
 int BoatControl::goToNextWaypoint()
 {
@@ -197,6 +196,6 @@ int BoatControl::goToNextWaypoint()
     }
     else
     {
-        return 0;
+        return -1;
     }
 }
